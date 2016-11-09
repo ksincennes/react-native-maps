@@ -11,23 +11,12 @@ const propTypes = {
   ...View.propTypes,
 
   /**
-   * The coordinate of the center of the circle
+   * string representation of the goeJSON
    */
-  center: PropTypes.shape({
-    /**
-     * Coordinates for the center of the circle.
-     */
-    latitude: PropTypes.number.isRequired,
-    longitude: PropTypes.number.isRequired,
-  }).isRequired,
+  coordinates: PropTypes.string,
 
   /**
-   * The radius of the circle to be drawn (in meters)
-   */
-  radius: PropTypes.number.isRequired,
-
-  /**
-   * Callback that is called when the user presses on the circle
+   * Callback that is called when the user presses on the polygon
    */
   onPress: PropTypes.func,
 
@@ -55,29 +44,6 @@ const propTypes = {
    */
   zIndex: PropTypes.number,
 
-  /**
-   * The line cap style to apply to the open ends of the path.
-   * The default style is `round`.
-   *
-   * @platform ios
-   */
-  lineCap: PropTypes.oneOf([
-    'butt',
-    'round',
-    'square',
-  ]),
-
-  /**
-   * The line join style to apply to corners of the path.
-   * The default style is `round`.
-   *
-   * @platform ios
-   */
-  lineJoin: PropTypes.oneOf([
-    'miter',
-    'round',
-    'bevel',
-  ]),
 
   /**
    * The limiting value that helps avoid spikes at junctions between connected line segments.
@@ -90,6 +56,16 @@ const propTypes = {
    * @platform ios
    */
   miterLimit: PropTypes.number,
+
+  /**
+   * Boolean to indicate whether to draw each segment of the line as a geodesic as opposed to
+   * straight lines on the Mercator projection. A geodesic is the shortest path between two
+   * points on the Earth's surface. The geodesic curve is constructed assuming the Earth is
+   * a sphere.
+   *
+   * @platform android
+   */
+  geodesic: PropTypes.bool,
 
   /**
    * The offset (in points) at which to start drawing the dash pattern.
@@ -120,24 +96,24 @@ const propTypes = {
 };
 
 const defaultProps = {
-  strokeColor: '#000',
+  strokeColor: '#FF0000',
   strokeWidth: 1,
 };
 
-class MapCircle extends React.Component {
+class MapGeoJson extends React.Component {
   render() {
-    const AIRMapCircle = this.getAirComponent();
+    const AIRMapGeoJSON = this.getAirComponent();
     return (
-      <AIRMapCircle {...this.props} />
+      <AIRMapGeoJSON {...this.props} />
     );
   }
 }
 
-MapCircle.propTypes = propTypes;
-MapCircle.defaultProps = defaultProps;
+MapGeoJson.propTypes = propTypes;
+MapGeoJson.defaultProps = defaultProps;
 
-module.exports = decorateMapComponent(MapCircle, {
-  componentType: 'Circle',
+module.exports = decorateMapComponent(MapGeoJson, {
+  componentType: 'GeoJSON',
   providers: {
     google: {
       ios: NOT_SUPPORTED,

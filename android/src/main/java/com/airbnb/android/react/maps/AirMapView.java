@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.util.Log;
 
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
@@ -393,6 +394,11 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
             AirMapUrlTile urlTileView = (AirMapUrlTile) child;
             urlTileView.addToMap(map);
             features.add(index, urlTileView);
+        } else if (child instanceof AirMapGeoJSON) {
+            Log.d("GEOJSON","Found a geoJSON object " + index);
+            AirMapGeoJSON geoJsonView = (AirMapGeoJSON) child;
+            geoJsonView.addToMap(map);
+            features.add(index, geoJsonView);
         } else {
             // TODO(lmr): throw? User shouldn't be adding non-feature children.
         }
@@ -571,15 +577,13 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
 
         switch (action) {
             case (MotionEvent.ACTION_DOWN):
-                this.getParent().requestDisallowInterceptTouchEvent(
-                        map != null && map.getUiSettings().isScrollGesturesEnabled());
+                this.getParent().requestDisallowInterceptTouchEvent(true);
                 isTouchDown = true;
                 break;
             case (MotionEvent.ACTION_MOVE):
                 startMonitoringRegion();
                 break;
             case (MotionEvent.ACTION_UP):
-                // Clear this regardless, since isScrollGesturesEnabled() may have been updated
                 this.getParent().requestDisallowInterceptTouchEvent(false);
                 isTouchDown = false;
                 break;

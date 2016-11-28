@@ -14,8 +14,15 @@ import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.facebook.react.common.MapBuilder;
+
 import com.google.maps.android.geojson.GeoJsonFeature;
 import com.google.maps.android.geojson.GeoJsonLayer;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Nullable;
 
 
 public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
@@ -58,13 +65,6 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
         view.setByProp(byProp);
     }
 
-
-    @ReactProp(name = "strokeWidth", defaultFloat = 1.0f)
-    public void setStrokeWidth(AirMapGeoJSON view, float widthInPoints) {
-        float widthInScreenPx = metrics.density * widthInPoints; // done for parity with iOS
-        view.setStrokeWidth(widthInPoints);
-    }
-
     @ReactProp(name = "fillColor")
     public void setFillColor(AirMapGeoJSON view, String color) {
         Log.e("INTPARSE", "parsing int into: " + (int) Long.parseLong(color, 16));
@@ -77,13 +77,79 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
         view.setStrokeColor((int) Long.parseLong(color, 16));
     }
 
+    @ReactProp(name = "strokeWidth", defaultFloat = 1.0f)
+    public void setStrokeWidth(AirMapGeoJSON view, float widthInPoints) {
+        float widthInScreenPx = metrics.density * widthInPoints; // done for parity with iOS
+        view.setStrokeWidth(widthInScreenPx);
+    }
+
     @ReactProp(name = "geodesic", defaultBoolean = false)
     public void setGeodesic(AirMapGeoJSON view, boolean geodesic) {
         view.setGeodesic(geodesic);
     }
 
+    @ReactProp(name = "visible", defaultBoolean = false)
+    public void setVisible(AirMapGeoJSON view, boolean visible) {
+        view.setVisible(visible);
+    }
+
     @ReactProp(name = "zIndex", defaultFloat = 1.0f)
     public void setZIndex(AirMapGeoJSON view, float zIndex) {
         view.setZIndex(zIndex);
+    }
+
+    @ReactProp(name = "color")
+    public void setColor(AirMapGeoJSON view, String color) {
+        Log.e("INTPARSE", "parsing int into: " + (int) Long.parseLong(color, 16));
+        view.setColor((int) Long.parseLong(color, 16));
+    }
+
+    @ReactProp(name = "clickable", defaultBoolean = true)
+    public void setClickable(AirMapGeoJSON view, String clickable) {
+        view.setClickable(clickable);
+    }
+
+    @ReactProp(name = "width", defaultFloat = 1.0f)
+    public void setWidth(AirMapGeoJSON view, float width) {
+        float widthInScreenPx = metrics.density * width; // done for parity with iOS
+        view.setWidth(widthInScreenPx);
+    }
+
+    @ReactProp(name = "title")
+    public void setTitle(AirMapGeoJSON view, String title) {
+        view.setTitle(title);
+    }
+
+    @ReactProp(name = "snippet")
+    public void setSnippet(AirMapGeoJSON view, String snippet) {
+        view.setSnippet(title);
+    }
+
+    @ReactProp(name = "rotation", defaultFloat = 1.0f)
+    public void setRotation(AirMapGeoJSON view, float rotation) {
+        view.setRotation(rotation);
+    }
+
+    @ReactProp(name = "infoWindowAnchor")
+    public void setInfoWindowAnchor(AirMapMarker view, ReadableMap map) {
+        // should default to (0.5, 1) (bottom middle)
+        double x = map != null && map.hasKey("U") ? map.getDouble("U") : 0.5;
+        double y = map != null && map.hasKey("V") ? map.getDouble("V") : 1.0;
+        view.setInfoWindowAnchor(x, y);
+    }
+
+    @ReactProp(name = "flat", defaultBoolean = false)
+    public void setFlat(AirMapGeoJSON view, boolean flat) {
+        view.setFlat(flat);
+    }
+
+    @ReactProp(name = "draggable", defaultBoolean = false)
+    public void setDraggable(AirMapGeoJSON view, boolean draggable) {
+        view.setDraggable(flat);
+    }
+
+    @ReactProp(name = "icon")
+    public void setIcon(AirMapGeoJSON view, String icon) {
+        view.setIcon(title);
     }
 }

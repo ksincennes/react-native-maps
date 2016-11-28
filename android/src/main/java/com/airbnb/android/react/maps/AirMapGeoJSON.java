@@ -9,44 +9,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.geojson.GeoJsonFeature;
 import com.google.maps.android.geojson.GeoJsonLayer;
 import com.google.maps.android.geojson.GeoJsonGeometry;
-
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import org.json.JSONException;
-import android.util.Log;
-
-
-
-
-public class AirMapGeoJSON extends AirMapFeature {
-
-    private JSONObject feature;
-    private GeoJsonLayer layer;
-    private JSONObject styles;
-    private GoogleMap mapObj;
-    private Map<String, GeoJsonPolygonStyle> polyStyles;
-    private Map<String, GeoJsonLineStringStyle> lineStyles;
-    private Map<String, GeoJsonPointStyle> pointStyles;
-    private boolean byProp;
-
-
-    public AirMapGeoJSON(Context context) {
-        super(context);
-    }
-
-    public void setGeoJSON(String geoJson) {     package com.airbnb.android.react.maps;
-
-import android.content.Context;
-
-import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.maps.android.geojson.GeoJsonFeature;
-import com.google.maps.android.geojson.GeoJsonLayer;
-import com.google.maps.android.geojson.GeoJsonGeometry;
 import com.google.maps.android.geojson.GeoJsonPolygonStyle;
 import com.google.maps.android.geojson.GeoJsonPointStyle;
 import com.google.maps.android.geojson.GeoJsonLineStringStyle;
@@ -82,6 +44,7 @@ public class AirMapGeoJSON extends AirMapFeature {
     private boolean byProp;
     private int strokeColor;
     private float strokeWidth;
+    private BitmapDescriptor iconBitmapDescriptor;
 
 
     public AirMapGeoJSON(Context context) {
@@ -111,6 +74,8 @@ public class AirMapGeoJSON extends AirMapFeature {
                 Log.e("Failed to get parse style string",err.getMessage());
             }
             generatePolyStyle(styles);
+            generateMarkerStyle(styles);
+            generateLineStringStyle(styles);
         }
     }
 
@@ -155,12 +120,18 @@ public class AirMapGeoJSON extends AirMapFeature {
             for(GeoJsonFeature styledFeature : this.layer.getFeatures()){
                 if(styledFeature.hasProperty(key)){
                         String value = styledFeature.getProperty(key);
-                        if(value == "3"){
-                            Log.e("STYLEBROKENFEATURE", "feature is of type: " + styledFeature.getGeometry());
-                            //Log.e("COORDINATES","number of co-ordinate arrays is: "+ styledFeature.getGeometry().Polygon.coordinates.length());
-                        }
                         if(polyStyles != null && polyStyles.containsKey(value)){
                             styledFeature.setPolygonStyle(polyStyles.get(value));
+                        } else{
+                            Log.e("NOSTYLE", "Could not get style for: " + value);
+                        }
+                        if(lineStyles != null && lineStyles.containsKey(value)){
+                            styledFeature.setPolygonStyle(lineStyles.get(value));
+                        } else{
+                            Log.e("NOSTYLE", "Could not get style for: " + value);
+                        }
+                        if(pointStyles != null && pointStyles.containsKey(value)){
+                            styledFeature.setPolygonStyle(pointStyles.get(value));
                         } else{
                             Log.e("NOSTYLE", "Could not get style for: " + value);
                         }
@@ -185,7 +156,7 @@ public class AirMapGeoJSON extends AirMapFeature {
 
 
 /************
- * Functions to set style atributes that apply to all shapes, overridden if byProp is true
+ * Functions to set style atributes that apply to Polygons, overridden if byProp is true
  * 
  */
     public void setFillColor(int color) {
@@ -203,9 +174,6 @@ public class AirMapGeoJSON extends AirMapFeature {
         if(this.polyStyle == null){
             this.polyStyle = new GeoJsonPolygonStyle();
         }
-        if(this.lineStyle == null){
-            this.lineStyle = new GeoJsonLineStringStyle();
-        }
         this.polyStyle.setStrokeColor(color);
     }
 
@@ -214,12 +182,14 @@ public class AirMapGeoJSON extends AirMapFeature {
         if(this.polyStyle == null){
             this.polyStyle = new GeoJsonPolygonStyle();
         }
-        if(this.lineStyle == null){
-            this.lineStyle = new GeoJsonLineStringStyle();
-        }
         this.polyStyle.setStrokeWidth(width);
     }
 
+
+/************
+ * Functions to set style atributes that apply to multiple geoJSON objects, overridden if byProp is true
+ * 
+ */
     public void setGeodesic(boolean geodesic) {
         if(this.polyStyle == null){
             this.polyStyle = new GeoJsonPolygonStyle();
@@ -228,6 +198,7 @@ public class AirMapGeoJSON extends AirMapFeature {
             this.lineStyle = new GeoJsonLineStringStyle();
         }
         this.polyStyle.setGeodesic(geodesic);
+        this.lineStyle.setGeodesic(geodesic);
     }
 
     public void setVisible(boolean visible) {
@@ -242,6 +213,7 @@ public class AirMapGeoJSON extends AirMapFeature {
         }
         this.polyStyle.setVisible(visible);
         this.pointStyle.setVisible(visible);
+        this.lineStyle.setVisible(visible);
     }
 
     public void setZIndex(float zIndex) {
@@ -252,8 +224,37 @@ public class AirMapGeoJSON extends AirMapFeature {
             this.lineStyle = new GeoJsonLineStringStyle();
         }
         this.polyStyle.setZIndex(zIndex);
+        this.lineStyle.setZIndex(zIndex);
     }
 
+/************
+ * Functions to set style atributes that apply to Lines, overridden if byProp is true
+ * 
+ */
+    public void setColor(int color){
+        if(this.lineStyle == null){
+            this.lineStyle = new GeoJsonLineStringStyle();
+        }
+        this.lineStyle.setColor(color);
+    }
+
+    public void setClickable(boolean clickable) {
+        if(this.lineStyle == null){
+            this.lineStyle = new GeoJsonLineStringStyle();
+        }
+        this.lineStyle.setVisible(clickable);
+    }
+
+    public void setWidth(float width) {
+        if(this.lineStyle == null){
+            this.lineStyle = new GeoJsonLineStringStyle();
+        }
+        this.lineStyle.setWidth(width);
+    }
+
+    /************************************
+     * Marker specific settings
+     */
     public void setTitle(String title){
         if(this.pointStyle == null){
             this.pointStyle = new GeoJsonPointStyle();
@@ -275,7 +276,7 @@ public class AirMapGeoJSON extends AirMapFeature {
         this.pointStyle.setRotation(rotation);
     }
 
-    public void setInforWindowAnchor(float infoWindowAnchorU, float infoWindowAnchorV){
+    public void setInfoWindowAnchor(float infoWindowAnchorU, float infoWindowAnchorV){
         if(this.pointStyle == null){
             this.pointStyle = new GeoJsonPointStyle();
         }
@@ -296,9 +297,130 @@ public class AirMapGeoJSON extends AirMapFeature {
         this.pointStyle.setDraggable(draggable);
     }
 
-    private void generateLineStringStyle(){
+    public void setIcon(String uri) {
+        if (uri == null) {
+            iconBitmapDescriptor = null;
+            update();
+        } else if (uri.startsWith("http://") || uri.startsWith("https://") ||
+                uri.startsWith("file://")) {
+            ImageRequest imageRequest = ImageRequestBuilder
+                    .newBuilderWithSource(Uri.parse(uri))
+                    .build();
 
+            ImagePipeline imagePipeline = Fresco.getImagePipeline();
+            dataSource = imagePipeline.fetchDecodedImage(imageRequest, this);
+            DraweeController controller = Fresco.newDraweeControllerBuilder()
+                    .setImageRequest(imageRequest)
+                    .setControllerListener(mLogoControllerListener)
+                    .setOldController(logoHolder.getController())
+                    .build();
+            logoHolder.setController(controller);
+        } else {
+            iconBitmapDescriptor = getBitmapDescriptorByName(uri);
+            update();
+        }
     }
+
+    /*************************************************************
+     * Functions that generate style maps for everything
+     */
+    private void generateLineStringStyle(JSONObject styles){
+        if(this.lineStyles == null){
+            this.lineStyles = new HashMap<String, GeoJsonLineStringStyle>();
+        }
+        JSONObject styleMap;
+        Iterator<String> keys;
+
+        if(styles.has("styles")){
+            try{
+                styleMap = styles.getJSONObject("styles");
+            } catch( JSONException err){
+                Log.e("Failed styles parse", err.getMessage());
+                return;
+            }
+            keys = styleMap.keys();
+            while(keys.hasNext()){
+                try{
+                    String key = keys.next();
+                    JSONObject styleObj = styleMap.getJSONObject(key);
+                    GeoJsonPolygonStyle tmp = new GeoJsonPolygonStyle();
+                    if(styleObj.has("color"))
+                        tmp.setFillColor(styleObj.getInt("fillColor"));
+                    if(styleObj.has("zIndex"))
+                        tmp.setZIndex((float)styleObj.getDouble("zIndex"));
+                    if(styleObj.has("width"))
+                        tmp.setStrokeWidth((float)styleObj.getDouble("width"));
+                    if(styleObj.has("geodesic"))
+                        tmp.setGeodesic(styleObj.getBoolean("geodesic"));
+                    if(styleObj.has("visible"))
+                        tmp.setGeodesic(styleObj.getBoolean("visible"));
+                    if(styleObj.has("clickable"))
+                        tmp.setDraggable(styleObj.getBoolean("clickable"));
+
+                    if(tmp != null)
+                        this.polyStyles.put(key, tmp);
+
+                } catch(JSONException err){
+                    Log.e("Failed to parse style", err.getMessage());
+                }
+            }
+        }
+    }
+
+    private void generateMarkerStyle(JSONObject styles){
+        if(this.pointStyles == null){
+            this.pointStyles = new HashMap<String, GeoJsonPointStyle>();
+        }
+        JSONObject styleMap;
+        Iterator<String> keys;
+
+        if(styles.has("styles")){
+            try{
+                styleMap = styles.getJSONObject("styles");
+            } catch( JSONException err){
+                Log.e("Failed styles parse", err.getMessage());
+                return;
+            }
+            keys = styleMap.keys();
+            while(keys.hasNext()){
+                try{
+                    String key = keys.next();
+                    JSONObject styleObj = styleMap.getJSONObject(key);
+                    GeoJsonPointStyle tmp = new GeoJsonPointStyle();
+                    if(styleObj.has("snippet"))
+                        tmp.setSnippet(styleObj.getString("snippet"));
+                    if(styleObj.has("rotation"))
+                        tmp.setRotation((float)styleObj.getDouble("rotation"));
+                    if(styleObj.has("infoWindowAnchor")){
+                        JSONObject windowAnchor = styleObj.getJSONObject("infoWindowAnchor");
+                        if(windowAnchor.has("U") && windowAnchor.has("V"))
+                            this.pointStyle.setInfoWindowAnchor((float)windowAnchor.getDouble("U"), (float)windowAnchor.getDouble("V"));
+                    }
+                    if(styleObj.has("flat"))
+                        tmp.setFlat(styleObj.getBoolean("flat"));
+                    if(styleObj.has("draggable"))
+                        tmp.setDraggable(styleObj.getBoolean("draggable"));
+                    if(styleObj.has("visible"))
+                        tmp.setGeodesic(styleObj.getBoolean("visible"));
+                    if(styleObj.has("title"))
+                        tmp.setSnippet(styleObj.getString("title"));
+                    if(tmp != null)
+                        this.pointStyles.put(key, tmp);
+                    if(styleObj.has("anchor")){
+                        JSONObject windowAnchor = styleObj.getJSONObject("anchor");
+                        if(windowAnchor.has("U") && windowAnchor.has("V"))
+                            this.pointStyle.setInfoWindowAnchor((float)windowAnchor.getDouble("U"), (float)windowAnchor.getDouble("V"));
+                    }
+                    if(styleObj.has("alpha"))
+                        tmp.setZIndex((float)styleObj.getDouble("alpha"));
+
+                } catch(JSONException err){
+                    Log.e("Failed to parse style", err.getMessage());
+                }
+            }
+        }
+    }
+
     private void generatePolyStyle(JSONObject styles){
         if(this.polyStyles == null){
             this.polyStyles = new HashMap<String, GeoJsonPolygonStyle>();
@@ -327,6 +449,11 @@ public class AirMapGeoJSON extends AirMapFeature {
                         tmp.setStrokeColor(styleObj.getInt("strokeColor"));
                     if(styleObj.has("geodesic"))
                         tmp.setGeodesic(styleObj.getBoolean("geodesic"));
+                    if(styleObj.has("zIndex"))
+                        tmp.setZIndex((float)styleObj.getDouble("zIndex"));
+                    if(styleObj.has("visible"))
+                        tmp.setGeodesic(styleObj.getBoolean("visible"));
+
                     if(tmp != null)
                         this.polyStyles.put(key, tmp);
 
@@ -338,117 +465,7 @@ public class AirMapGeoJSON extends AirMapFeature {
         
     }
 
-
-}
-
-        if (geoJson != "") {
-            try{
-                feature = new JSONObject(geoJson);
-                
-            } catch(JSONException err){
-                Log.e("GEOJSONPARSE",err.getMessage());
-            }
-            if(mapObj != null){
-                layer = new GeoJsonLayer(mapObj, feature);
-                layer.addLayerToMap();
-            }
-        }
+    private BitmapDescriptor getBitmapDescriptorByName(String name) {
+        return BitmapDescriptorFactory.fromResource(getDrawableResourceByName(name));
     }
-
-    public void setStyles(String style) {
-        if(styles != ""){            
-            styles = new JSONObject(style);
-        }
-        if(layer != null && style.has("name") && style.has("styles")){
-            List<GeoJsonFeature> featureList = layer.getFeatures();
-            String key = style.getString("name")
-            JSONObject styleMap = 
-            for(GeoJsonFeature styledFeature : featureList){
-                if(styledFeature.has(key)){
-                    String value = styledFeature.getString(key)
-                    if(styles.has(value)){
-                        JSONObject style = styles.getJSONObject(value)
-                        if(styledFeature.getString("type").match("Polygon|MultiPolygon|GeometryCollection")){
-
-                            if(style)
-                        } //else if()
-                    }
-                }
-            }
-        }
-       /* if (feature != null) {
-            GeoJsonPolygonStyle polyStyle = new GeoJsonPolygonStyle()
-            feature.getDefault
-            polyStyle
-            feature.setStrokeWidth(width);
-        }*/
-    }
-
-
-
-    @Override
-    public Object getFeature() {
-        return feature;
-    }
-
-    @Override
-    public void addToMap(GoogleMap map) {
-        if( feature != null && feature.length() > 0){
-            layer = new GeoJsonLayer(map, feature);
-            layer.addLayerToMap();
-        } else {
-            mapObj = map;
-        }
-    }
-
-    @Override
-    public void removeFromMap(GoogleMap map) {
-        if(layer != null){
-            layer.removeLayerFromMap();
-        }
-    }
-
-    public void setFillColor(int color) {
-        this.fillColor = color;
-        if (polygon != null) {
-            polygon.setFillColor(color);
-        }
-    }
-
-    public void setStrokeColor(int color) {
-        this.strokeColor = color;
-        if (polygon != null) {
-            polygon.setStrokeColor(color);
-        }
-    }
-
-    public void setStrokeWidth(float width) {
-        this.strokeWidth = width;
-        if (polygon != null) {
-            polygon.setStrokeWidth(width);
-        }
-    }
-
-    public void setGeodesic(boolean geodesic) {
-        this.geodesic = geodesic;
-        if (polygon != null) {
-            polygon.setGeodesic(geodesic);
-        }
-    }
-
-    public void setZIndex(float zIndex) {
-        this.zIndex = zIndex;
-        if (polygon != null) {
-            polygon.setZIndex(zIndex);
-        }
-    }
-
-    private void generateLineStringStyle(){
-
-    }
-    private void generatePolyStyle(){
-        
-    }
-
-
 }

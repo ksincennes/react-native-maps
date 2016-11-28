@@ -96,10 +96,12 @@ const propTypes = {
    * @platform ios
    */
   lineDashPattern: PropTypes.arrayOf(PropTypes.number),
+  onPress: PropTypes.func,
 };
 
 const defaultProps = {
-  strokeWidth: 1
+  strokeWidth: 1,
+  onPress() {},
 };
 
 class MapGeoJson extends React.Component {

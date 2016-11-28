@@ -36,6 +36,7 @@ public class MapsPackage implements ReactPackage {
         AirMapPolylineManager polylineManager = new AirMapPolylineManager(reactContext);
         AirMapPolygonManager polygonManager = new AirMapPolygonManager(reactContext);
         AirMapCircleManager circleManager = new AirMapCircleManager(reactContext);
+        AirMapGeoJSONManager geoJsonManager = new AirMapGeoJSONManager(reactContext);
         AirMapManager mapManager = new AirMapManager(reactContext);
         AirMapLiteManager mapLiteManager = new AirMapLiteManager(reactContext);
         AirMapUrlTileManager tileManager = new AirMapUrlTileManager(reactContext);
@@ -46,6 +47,7 @@ public class MapsPackage implements ReactPackage {
                 polylineManager,
                 polygonManager,
                 circleManager,
+                geoJsonManager,
                 mapManager,
                 mapLiteManager,
                 tileManager);

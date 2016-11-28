@@ -49,6 +49,9 @@ const propTypes = {
     V: PropTypes.number.isRequired,
   }),
 
+  styles: PropTypes.string,
+  byProp: PropTypes.bool,
+
   /**
    * The order in which this tile overlay is drawn with respect to other overlays. An overlay
    * with a larger z-index is drawn over overlays with smaller z-indices. The order of overlays

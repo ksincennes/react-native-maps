@@ -19,12 +19,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.util.Log;
 
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.bridge.WritableNativeArray;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.UIManagerModule;
 import com.facebook.react.uimanager.events.EventDispatcher;
@@ -41,6 +44,10 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.Polyline;
+
+import com.google.maps.android.geojson.GeoJsonFeature;
+import com.google.maps.android.geojson.GeoJsonLayer;
+import com.google.maps.android.geojson.GeoJsonGeometry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -215,6 +222,24 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
                 event.putString("action", "press");
                 manager.pushEvent(view, "onPress", event);
             }
+        });
+
+        map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
+            @Override
+            public void onPolygonClick (Polygon polygon) {
+                WritableMap event = makePolygonClickEventData(polygon);
+                event.putString("action", "press");
+                manager.pushEvent(view, "onPress", event);
+            }
+        });
+
+        map.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener(){
+            @Override
+            public void onPolylineClick(Polyline polyline) {
+                WritableMap event = makeLineClickEventData(polyline);
+                event.putString("action", "press");
+                manager.pushEvent(view, "onPress", event);
+            }     
         });
 
         map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -419,6 +444,11 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
             AirMapUrlTile urlTileView = (AirMapUrlTile) child;
             urlTileView.addToMap(map);
             features.add(index, urlTileView);
+        } else if (child instanceof AirMapGeoJSON) {
+            Log.d("GEOJSON","Found a geoJSON object " + index);
+            AirMapGeoJSON geoJsonView = (AirMapGeoJSON) child;
+            geoJsonView.addToMap(map);
+            features.add(index, geoJsonView);
         } else {
             // TODO(lmr): throw? User shouldn't be adding non-feature children.
         }
@@ -455,6 +485,38 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
         position.putDouble("x", screenPoint.x);
         position.putDouble("y", screenPoint.y);
         event.putMap("position", position);
+
+        return event;
+    }
+
+    public WritableMap makePolygonClickEventData(Polygon feature){
+        WritableMap event = new WritableNativeMap();
+        WritableArray points = new WritableNativeArray();
+        List<LatLng> pointList = feature.getPoints();
+        for(LatLng point : pointList){
+            WritableMap position = new WritableNativeMap();
+            position.putDouble("latitude", point.latitude);
+            position.putDouble("longitude", point.longitude);
+            points.pushMap(position);
+        }
+        event.putArray("polygon", points);
+        //event.putMap("feature", feature);
+
+        return event;
+    }
+
+    public WritableMap makeLineClickEventData(Polyline feature){
+        WritableMap event = new WritableNativeMap();
+        WritableArray points = new WritableNativeArray();
+        List<LatLng> pointList = feature.getPoints();
+        for(LatLng point : pointList){
+            WritableMap position = new WritableNativeMap();
+            position.putDouble("latitude", point.latitude);
+            position.putDouble("longitude", point.longitude);
+            points.pushMap(position);
+        }
+        event.putArray("line", points);
+        //event.putMap("feature", feature);
 
         return event;
     }
@@ -597,15 +659,13 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
 
         switch (action) {
             case (MotionEvent.ACTION_DOWN):
-                this.getParent().requestDisallowInterceptTouchEvent(
-                        map != null && map.getUiSettings().isScrollGesturesEnabled());
+                this.getParent().requestDisallowInterceptTouchEvent(true);
                 isTouchDown = true;
                 break;
             case (MotionEvent.ACTION_MOVE):
                 startMonitoringRegion();
                 break;
             case (MotionEvent.ACTION_UP):
-                // Clear this regardless, since isScrollGesturesEnabled() may have been updated
                 this.getParent().requestDisallowInterceptTouchEvent(false);
                 isTouchDown = false;
                 break;

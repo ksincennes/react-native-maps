@@ -105,7 +105,7 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
     }
 
     @ReactProp(name = "clickable", defaultBoolean = true)
-    public void setClickable(AirMapGeoJSON view, String clickable) {
+    public void setClickable(AirMapGeoJSON view, boolean clickable) {
         view.setClickable(clickable);
     }
 
@@ -122,7 +122,7 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
 
     @ReactProp(name = "snippet")
     public void setSnippet(AirMapGeoJSON view, String snippet) {
-        view.setSnippet(title);
+        view.setSnippet(snippet);
     }
 
     @ReactProp(name = "rotation", defaultFloat = 1.0f)
@@ -131,11 +131,11 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
     }
 
     @ReactProp(name = "infoWindowAnchor")
-    public void setInfoWindowAnchor(AirMapMarker view, ReadableMap map) {
+    public void setInfoWindowAnchor(AirMapGeoJSON view, ReadableMap map) {
         // should default to (0.5, 1) (bottom middle)
         double x = map != null && map.hasKey("U") ? map.getDouble("U") : 0.5;
         double y = map != null && map.hasKey("V") ? map.getDouble("V") : 1.0;
-        view.setInfoWindowAnchor(x, y);
+        view.setInfoWindowAnchor((float) x, (float) y);
     }
 
     @ReactProp(name = "flat", defaultBoolean = false)
@@ -145,11 +145,11 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
 
     @ReactProp(name = "draggable", defaultBoolean = false)
     public void setDraggable(AirMapGeoJSON view, boolean draggable) {
-        view.setDraggable(flat);
+        view.setDraggable(draggable);
     }
 
     @ReactProp(name = "icon")
     public void setIcon(AirMapGeoJSON view, String icon) {
-        view.setIcon(title);
+        view.setIcon(icon);
     }
 }

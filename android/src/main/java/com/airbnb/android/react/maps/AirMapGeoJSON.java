@@ -1,7 +1,13 @@
 package com.airbnb.android.react.maps;
 
-import android.content.Context;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Animatable;
+import android.net.Uri;
+import android.view.View;
+import android.widget.LinearLayout;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
 import com.google.android.gms.maps.GoogleMap;
@@ -12,6 +18,14 @@ import com.google.maps.android.geojson.GeoJsonGeometry;
 import com.google.maps.android.geojson.GeoJsonPolygonStyle;
 import com.google.maps.android.geojson.GeoJsonPointStyle;
 import com.google.maps.android.geojson.GeoJsonLineStringStyle;
+import com.facebook.imagepipeline.core.ImagePipeline;
+import com.facebook.imagepipeline.image.CloseableImage;
+import com.facebook.imagepipeline.image.CloseableStaticBitmap;
+import com.facebook.imagepipeline.image.ImageInfo;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,8 +59,6 @@ public class AirMapGeoJSON extends AirMapFeature {
     private int strokeColor;
     private float strokeWidth;
     private BitmapDescriptor iconBitmapDescriptor;
-
-
     public AirMapGeoJSON(Context context) {
         super(context);
     }
@@ -126,12 +138,12 @@ public class AirMapGeoJSON extends AirMapFeature {
                             Log.e("NOSTYLE", "Could not get style for: " + value);
                         }
                         if(lineStyles != null && lineStyles.containsKey(value)){
-                            styledFeature.setPolygonStyle(lineStyles.get(value));
+                            styledFeature.setLineStringStyle(lineStyles.get(value));
                         } else{
                             Log.e("NOSTYLE", "Could not get style for: " + value);
                         }
                         if(pointStyles != null && pointStyles.containsKey(value)){
-                            styledFeature.setPolygonStyle(pointStyles.get(value));
+                            styledFeature.setPointStyle(pointStyles.get(value));
                         } else{
                             Log.e("NOSTYLE", "Could not get style for: " + value);
                         }
@@ -298,26 +310,18 @@ public class AirMapGeoJSON extends AirMapFeature {
     }
 
     public void setIcon(String uri) {
+        iconBitmapDescriptor = generageBitmap(uri);
+        this.pointStyle.setIcon(iconBitmapDescriptor);
+    }
+
+    private BitmapDescriptor generageBitmap(String uri){
         if (uri == null) {
-            iconBitmapDescriptor = null;
-            update();
+            return null;
         } else if (uri.startsWith("http://") || uri.startsWith("https://") ||
                 uri.startsWith("file://")) {
-            ImageRequest imageRequest = ImageRequestBuilder
-                    .newBuilderWithSource(Uri.parse(uri))
-                    .build();
-
-            ImagePipeline imagePipeline = Fresco.getImagePipeline();
-            dataSource = imagePipeline.fetchDecodedImage(imageRequest, this);
-            DraweeController controller = Fresco.newDraweeControllerBuilder()
-                    .setImageRequest(imageRequest)
-                    .setControllerListener(mLogoControllerListener)
-                    .setOldController(logoHolder.getController())
-                    .build();
-            logoHolder.setController(controller);
+            return null;
         } else {
-            iconBitmapDescriptor = getBitmapDescriptorByName(uri);
-            update();
+            return getBitmapDescriptorByName(uri);
         }
     }
 
@@ -343,22 +347,22 @@ public class AirMapGeoJSON extends AirMapFeature {
                 try{
                     String key = keys.next();
                     JSONObject styleObj = styleMap.getJSONObject(key);
-                    GeoJsonPolygonStyle tmp = new GeoJsonPolygonStyle();
+                    GeoJsonLineStringStyle tmp = new GeoJsonLineStringStyle();
                     if(styleObj.has("color"))
-                        tmp.setFillColor(styleObj.getInt("fillColor"));
+                        tmp.setColor(styleObj.getInt("color"));
                     if(styleObj.has("zIndex"))
                         tmp.setZIndex((float)styleObj.getDouble("zIndex"));
                     if(styleObj.has("width"))
-                        tmp.setStrokeWidth((float)styleObj.getDouble("width"));
+                        tmp.setWidth((float)styleObj.getDouble("width"));
                     if(styleObj.has("geodesic"))
                         tmp.setGeodesic(styleObj.getBoolean("geodesic"));
                     if(styleObj.has("visible"))
-                        tmp.setGeodesic(styleObj.getBoolean("visible"));
+                        tmp.setVisible(styleObj.getBoolean("visible"));
                     if(styleObj.has("clickable"))
-                        tmp.setDraggable(styleObj.getBoolean("clickable"));
+                        tmp.setClickable(styleObj.getBoolean("clickable"));
 
                     if(tmp != null)
-                        this.polyStyles.put(key, tmp);
+                        this.lineStyles.put(key, tmp);
 
                 } catch(JSONException err){
                     Log.e("Failed to parse style", err.getMessage());
@@ -401,7 +405,7 @@ public class AirMapGeoJSON extends AirMapFeature {
                     if(styleObj.has("draggable"))
                         tmp.setDraggable(styleObj.getBoolean("draggable"));
                     if(styleObj.has("visible"))
-                        tmp.setGeodesic(styleObj.getBoolean("visible"));
+                        tmp.setVisible(styleObj.getBoolean("visible"));
                     if(styleObj.has("title"))
                         tmp.setSnippet(styleObj.getString("title"));
                     if(tmp != null)
@@ -412,7 +416,7 @@ public class AirMapGeoJSON extends AirMapFeature {
                             this.pointStyle.setInfoWindowAnchor((float)windowAnchor.getDouble("U"), (float)windowAnchor.getDouble("V"));
                     }
                     if(styleObj.has("alpha"))
-                        tmp.setZIndex((float)styleObj.getDouble("alpha"));
+                        tmp.setAlpha((float)styleObj.getDouble("alpha"));
 
                 } catch(JSONException err){
                     Log.e("Failed to parse style", err.getMessage());
@@ -463,6 +467,13 @@ public class AirMapGeoJSON extends AirMapFeature {
             }
         }
         
+    }
+
+    private int getDrawableResourceByName(String name) {
+        return getResources().getIdentifier(
+                name,
+                "drawable",
+                getContext().getPackageName());
     }
 
     private BitmapDescriptor getBitmapDescriptorByName(String name) {

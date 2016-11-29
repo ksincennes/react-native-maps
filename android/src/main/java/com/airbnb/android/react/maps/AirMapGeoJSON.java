@@ -59,6 +59,8 @@ public class AirMapGeoJSON extends AirMapFeature {
     private int strokeColor;
     private float strokeWidth;
     private BitmapDescriptor iconBitmapDescriptor;
+    private String title;
+    
     public AirMapGeoJSON(Context context) {
         super(context);
     }

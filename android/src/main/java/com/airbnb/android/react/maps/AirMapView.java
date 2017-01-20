@@ -445,7 +445,6 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
             urlTileView.addToMap(map);
             features.add(index, urlTileView);
         } else if (child instanceof AirMapGeoJSON) {
-            Log.d("GEOJSON","Found a geoJSON object " + index);
             AirMapGeoJSON geoJsonView = (AirMapGeoJSON) child;
             geoJsonView.addToMap(map);
             features.add(index, geoJsonView);

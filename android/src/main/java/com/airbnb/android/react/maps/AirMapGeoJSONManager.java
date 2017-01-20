@@ -67,13 +67,11 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
 
     @ReactProp(name = "fillColor")
     public void setFillColor(AirMapGeoJSON view, String color) {
-        Log.e("INTPARSE", "parsing int into: " + (int) Long.parseLong(color, 16));
         view.setFillColor((int) Long.parseLong(color, 16));
     }
 
     @ReactProp(name = "strokeColor")
     public void setStrokeColor(AirMapGeoJSON view, String color) {
-        Log.e("INTPARSE", "parsing int into: " + (int) Long.parseLong(color, 16));
         view.setStrokeColor((int) Long.parseLong(color, 16));
     }
 
@@ -99,8 +97,7 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
     }
 
     @ReactProp(name = "color")
-    public void setColor(AirMapGeoJSON view, String color) {
-        Log.e("INTPARSE", "parsing int into: " + (int) Long.parseLong(color, 16));
+    public void setColor(AirMapGeoJSON view, String color) 
         view.setColor((int) Long.parseLong(color, 16));
     }
 

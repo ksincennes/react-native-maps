@@ -97,7 +97,7 @@ public class AirMapGeoJSONManager extends ViewGroupManager<AirMapGeoJSON> {
     }
 
     @ReactProp(name = "color")
-    public void setColor(AirMapGeoJSON view, String color) 
+    public void setColor(AirMapGeoJSON view, String color) {
         view.setColor((int) Long.parseLong(color, 16));
     }
 

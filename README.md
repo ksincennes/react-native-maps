@@ -190,6 +190,24 @@ render() {
   );
 }
 ```
+For iOS, in addition to providing the `mapStyle` you will need to do the following
+
+```jsx
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps'
+
+// ...
+
+<MapView
+  provider={PROVIDER_GOOGLE}
+  customMapStyle={MapStyle}
+>
+```
+
+Then add the AirGoogleMaps directory:
+
+https://github.com/airbnb/react-native-maps/blob/1e71a21f39e7b88554852951f773c731c94680c9/docs/installation.md#ios
+
+An unoffical step-by-step guide is also available at https://gist.github.com/heron2014/e60fa003e9b117ce80d56bb1d5bfe9e0
 
 ## Examples
 
@@ -373,7 +391,6 @@ render() {
 ```
 
 ### Take Snapshot of map
-currently only for ios, android implementation WIP
 
 ```jsx
 getInitialState() {
@@ -386,11 +403,19 @@ getInitialState() {
 }
 
 takeSnapshot () {
-  // arguments to 'takeSnapshot' are width, height, coordinates and callback
-  this.refs.map.takeSnapshot(300, 300, this.state.coordinate, (err, snapshot) => {
-    // snapshot contains image 'uri' - full path to image and 'data' - base64 encoded image
-    this.setState({ mapSnapshot: snapshot })
-  })
+  // 'takeSnapshot' takes a config object with the
+  // following options
+  const snapshot = this.refs.map.takeSnapshot({
+    width: 300,      // optional, when omitted the view-width is used
+    height: 300,     // optional, when omitted the view-height is used
+    region: {..},    // iOS only, optional region to render
+    format: 'png',   // image formats: 'png', 'jpg' (default: 'png')
+    quality: 0.8,    // image quality: 0..1 (only relevant for jpg, default: 1)
+    result: 'file'   // result types: 'file', 'base64' (default: 'file')
+  });
+  snapshot.then((uri) => {
+    this.setState({ mapSnapshot: uri });
+  });
 }
 
 render() {
@@ -469,7 +494,7 @@ Good:
 License
 --------
 
-     Copyright (c) 2015 Leland Richardson
+     Copyright (c) 2015 Airbnb
 
      Licensed under the The MIT License (MIT) (the "License");
      you may not use this file except in compliance with the License.

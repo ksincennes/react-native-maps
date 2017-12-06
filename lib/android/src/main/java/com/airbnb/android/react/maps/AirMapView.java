@@ -344,11 +344,6 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
   }
 
 
-
-
-
-
-
     public WritableMap makePolygonClickEventData(Polygon feature){
         WritableMap event = new WritableNativeMap();
         WritableArray points = new WritableNativeArray();

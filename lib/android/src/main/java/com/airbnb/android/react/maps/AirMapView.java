@@ -685,6 +685,7 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
         }
       }
     }
+  }
 
 
   public void fitToCoordinates(ReadableArray coordinatesArray, ReadableMap edgePadding,

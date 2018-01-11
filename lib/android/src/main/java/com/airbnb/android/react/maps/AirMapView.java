@@ -201,21 +201,21 @@ public class AirMapView extends MapView implements GoogleMap.InfoWindowAdapter,
     });
 
     map.setOnPolygonClickListener(new GoogleMap.OnPolygonClickListener() {
-      @Override
-      public void onPolygonClick(Polygon polygon) {
-        WritableMap event = makeClickEventData(polygon.getPoints().get(0));
-        event.putString("action", "polygon-press");
-        manager.pushEvent(context, polygonMap.get(polygon), "onPress", event);
-      }
+         @Override
+         public void onPolygonClick (Polygon polygon) {
+             WritableMap event = makePolygonClickEventData(polygon);
+             event.putString("action", "press");
+             manager.pushEvent(context, view, "onPress", event);
+         }
     });
 
-    map.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener() {
-      @Override
-      public void onPolylineClick(Polyline polyline) {
-        WritableMap event = makeClickEventData(polyline.getPoints().get(0));
-        event.putString("action", "polyline-press");
-        manager.pushEvent(context, polylineMap.get(polyline), "onPress", event);
-      }
+    map.setOnPolylineClickListener(new GoogleMap.OnPolylineClickListener(){
+         @Override
+         public void onPolylineClick(Polyline polyline) {
+             WritableMap event = makeLineClickEventData(polyline);
+             event.putString("action", "press");
+             manager.pushEvent(context, view, "onPress", event);
+         }
     });
 
     map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
